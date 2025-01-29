@@ -9,57 +9,42 @@ use LonaHTTP\Server;
 use LonaHTTP\Request;
 use LonaHTTP\Response;
 
-require "Client.php";
-
 class Dashboard {
-	public LonaDB $client;
 	public phpMQTT $mqtt;
+    public mysqli $database;
 
 	public function __construct(){
-		$server = "10.21.5.142";
-		$port = 1883;
+		//$server = "10.21.5.142";
+        $server = "192.168.0.10";
+        $port = 1883;
 		$clientId = "webinterface";
 
+        $this->database = new mysqli($server, "mqtt", "mqtt", "mqtt");
 		$this->mqtt = new phpMQTT($server, $port, $clientId);
 		$this->mqtt->connect();
 
 		$topics["home"] = array("qos" => 0, "function" => "procMsg");
 		$this->mqtt->subscribe($topics, 0);
 
-		$this->client = new LonaDB("vserver.lona-development.org", 2040, "root", "test");
-		$test = $this->client->createTable("mqtt");
-		var_dump($test);
 		
 		$this->run();
 	}
 	
 	public function checkLogin(string $user, string $password){
-        $server = "10.21.5.142";
-        $username = "mqtt";
-        $dbpassword = "mqtt";
-        $database = "mqtt";
-
-        $conn = new mysqli($server, $username, $dbpassword, $database);
-
-        $results = $conn->query("SELECT * FROM users WHERE name = '$user';");
+        $results = $this->database->query("SELECT * FROM users WHERE name = '$user';");
 
         if($results->num_rows > 0) {
             while($row = $results->fetch_assoc()) {
-                var_dump($password);
                 $pw = openssl_decrypt($row["password"], "aes-256-cbc", "mqtt", 0);
-                var_dump($pw);
                 $password = str_replace(["\n", "\r"], '', $password);
                 $pw = str_replace(["\n", "\r"], '', $pw);
-                if ($password === $pw) {
-                    echo "LOGIN";
-                    $conn->close();
+                if ($password == $pw) {
                     return true;
                 }
 
             }
         }
 
-        $conn->close();
         return false;
     }
 
@@ -84,16 +69,8 @@ class Dashboard {
                         return $response->redirect("/login");
                 }
 
-                $server = "10.21.5.142";
-                $username = "mqtt";
-                $password = "mqtt";
-                $database = "mqtt";
+				$results = $this->database->query("SELECT * FROM (SELECT * FROM mqtt ORDER BY id DESC LIMIT 30) AS subquery ORDER BY id ASC;");
 
-				$conn = new mysqli($server, $username, $password, $database);
-
-				$results = $conn->query("SELECT * FROM (SELECT * FROM mqtt ORDER BY id DESC LIMIT 30) AS subquery ORDER BY id ASC;");
-
-				var_dump($results);
 				$data = [];
 				$count = 0;
 				if($results->num_rows > 0) {
@@ -102,9 +79,6 @@ class Dashboard {
 						$count++;
 					}
 				}
-				var_dump($data);
-
-				$conn->close();
 
 				$response->render("./render.php", [
 					"data" => $data
@@ -170,18 +144,11 @@ class Dashboard {
             });
 
             $webserver->post('/register', function(Request $request, Response $response) {
-                $server = "10.21.5.142";
-                $username = "mqtt";
-                $password = "mqtt";
-                $database = "mqtt";
-
-                $conn = new mysqli($server, $username, $password, $database);
-
                 if( $request->getBody()["username"] != null &&
                     $request->getBody()["password"] != null){
 
-                    $user=$request->getBody()['username'];
-                    $results = $conn->query("SELECT * FROM users WHERE name = '$user';");
+                    $user = $request->getBody()['username'];
+                    $results = $this->database->query("SELECT * FROM users WHERE name = '$user';");
 
                     $exist = false;
                     if($results->num_rows > 0) {
@@ -199,7 +166,6 @@ class Dashboard {
                     }
                 }
 
-                $conn->close();
                 $response->redirect("/login?error=wrongLogin");
             });
 
@@ -242,8 +208,9 @@ $dashboard = new Dashboard();
 
 function procMsg($topic, $msg){
 	$data = json_decode(str_replace("'", '"' ,$msg), true);
-	$server = "10.21.5.142";
-	$username = "mqtt";
+	//$server = "10.21.5.142";
+    $server = "192.168.0.10";
+    $username = "mqtt";
 	$password = "mqtt";
 	$database = "mqtt";
 
@@ -251,9 +218,12 @@ function procMsg($topic, $msg){
 
 	$light = $data["ambient_light"];
 	$humidity = $data["humidity"];
-	$temperature = $data["temperature"];
+    $temperature = $data["temperature"];+
+    $motion = $data["motion"];
+    $pressure = $data["pressure"];
+    $time = $data["time"];
 
-	$conn->query("INSERT INTO mqtt (Light, Humidity, Temperature, Time) VALUES ($light, $humidity, $temperature, NOW());");
+	$conn->query("INSERT INTO mqtt (Light, Humidity, Temperature, Motion, Pressure, Time) VALUES ($light, $humidity, $temperature, $motion, $pressure, '$time');");
 
 	$conn->close();
 	unset($conn);
