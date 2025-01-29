@@ -16,7 +16,7 @@ class Dashboard {
 	public phpMQTT $mqtt;
 
 	public function __construct(){
-		$server = "localhost";
+		$server = "10.21.5.142";
 		$port = 1883;
 		$clientId = "webinterface";
 
@@ -53,10 +53,10 @@ class Dashboard {
 			$webserver = new Server(5050);
 
 			$webserver->get("/", function(Request $request, Response $response){
-				$server = "localhost";
-				$username = "mqtt";
-				$password = "mqtt";
-				$database = "mqtt";
+                $server = "10.21.5.142";
+                $username = "mqtt";
+                $password = "mqtt";
+                $database = "mqtt";
 
 				$conn = new mysqli($server, $username, $password, $database);
 
@@ -80,7 +80,19 @@ class Dashboard {
 				]);
 			});
 
-			$webserver->listen();
+            $webserver->get("/login", function(Request $request, Response $response) {
+                $response->render("./login.php");
+            });
+
+            $webserver->get("/stylesheet.css", function(Request $request, Response $response) {
+                $response->send(file_get_contents("stylesheet.css"), "text/css");
+            });
+
+            $webserver->get("/login.css", function(Request $request, Response $response) {
+                $response->send(file_get_contents("login.css"), "text/css");
+            });
+
+            $webserver->listen();
 		}else{
 			while($this->mqtt->proc()){}
 			$this->mqtt->close();
@@ -92,7 +104,7 @@ $dashboard = new Dashboard();
 
 function procMsg($topic, $msg){
 	$data = json_decode(str_replace("'", '"' ,$msg), true);
-	$server = "localhost";
+	$server = "10.21.5.142";
 	$username = "mqtt";
 	$password = "mqtt";
 	$database = "mqtt";

@@ -19,9 +19,9 @@ class Response {
         $this->sessionId = $sessionId;
     }
 
-    public function send(string $content): void {
+    public function send(string $content, string $type = "text/plain"): void {
         $this->content = $content;
-        $this->type = 'text/plain';  // Standard type for 'send'
+        $this->type = $type;  // Standard type for 'send'
         $this->sendResponse();
     }
 

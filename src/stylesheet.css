@@ -1,0 +1,77 @@
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.container {
+    max-width: 70vw;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: #1e1e1e;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.toggleTemp {
+    cursor: pointer;
+    padding: 10px;
+    background: #2196f3;
+    color: white;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.toggleHumidity {
+    cursor: pointer;
+    padding: 10px;
+    background: #4caf50;
+    color: white;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.toggleMotion {
+    cursor: pointer;
+    padding: 10px;
+    background: purple;
+    color: white;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.togglePressure {
+    cursor: pointer;
+    padding: 10px;
+    background: deeppink;
+    color: white;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.toggleLight {
+    cursor: pointer;
+    padding: 10px;
+    background: #d91e37;
+    color: white;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.hover {
+    transition: transform .2s; /* Animation */
+}
+
+.hover:hover {
+    transform: scale(101%);
+}
+
+canvas {
+    display: none;
+}
