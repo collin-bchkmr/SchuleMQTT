@@ -1,0 +1,11 @@
+{
+    "name": "collin/mqtt",
+    "autoload": {
+        "psr-4": {
+            "Collin\\Mqtt\\": "src/"
+        }
+    },
+    "require": {
+        "bluerhinos/phpmqtt": "^1.0"
+    }
+}
